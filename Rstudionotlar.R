@@ -302,7 +302,7 @@ nex_df <- rename(df, Country = country)
 df <- mutate(df, pop_million = pop / 1000000)
 View(df)
 
-#istall yaptık sildik paketi
+%>% #istall yaptık sildik paketi
 library(magrittr)
 
 
@@ -311,5 +311,145 @@ library(magrittr)
 
 df %>% filter(country == "Turkey" & year == 2007) %>% select(pop)
 library(dplyr)
+
+
+
+#week 3
+
+library(car)
+View(Prestige)
+
+df <- Prestige
+
+df <-  na.omit(Prestige)
+df %>% 
+  ggplot(aes(x=education, y=income)) +
+  geom_point()+
+  labs(x = "education", y= "income")
+df %>% 
+  group_by(type) %>% 
+  summarise(women_perc= mean(women)) %>% 
+  arrange(women_perc)
+
+ceren <- lm(df)
+
+kerem <- lm(income ~ education, data = df)
+
+
+#4. hafta...........
+
+mtcars
+View(mtcars)
+?mtcars
+
+mtcars %>% 
+  group_by(cyl) %>% 
+  summarize(mean(mpg))
+
+model <- lm(mpg ~ cyl + wt, data = mtcars)
+model
+
+
+library(rtweet)
+library(stringr)    # for str_replace_all function (cleaning tweets)
+library(dplyr)      # for data frame manipulation functions like anti_join, inner_join, count, ungroup
+library(magrittr)   # for pipe operator %>%
+library(ggplot2)    # for data visualization
+library(readr)      # for reading data frames
+library(rtweet)     # for fetching tweets
+library(wordcloud)  # for creating word clouds
+library(stopwords)  # for a package of stop words
+#library(syuzhet)    # for sentiment analysis in English
+library(xlsx)       # for Excel
+library(tidyverse)
+
+
+
+my_tweets <- read_csv("http://kelesonur.github.io/compec-r/tweets_ince.csv")
+View(df)
+
+clean_tweets <- function(x) {
+  x %>%
+    str_remove_all(" ?(f|ht)(tp)(s?)(://)(.*)[.|/](.*)") %>%
+    str_replace_all("&amp;", "and") %>%
+    str_replace("RT @[a-z,A-Z]*: ","") %>%
+    str_remove_all("[[:punct:]]") %>%
+    str_replace_all("@[a-z,A-Z]*","") %>%
+    str_replace_all("#[a-z,A-Z]*","") %>%
+    str_remove_all("^RT:? ") %>%
+    str_remove_all("@[[:alnum:]]+") %>%
+    str_remove_all("#[[:alnum:]]+") %>%
+    str_replace_all("\\\n", " ") %>%
+    str_to_lower() %>%
+    str_trim("both")
+}
+
+clean_tweet = gsub("&amp", "", my_tweets$text)
+clean_tweet = gsub("(RT|via)((?:\\b\\W*@\\w+)+)", "", clean_tweet)
+clean_tweet = gsub("@\\w+", "", clean_tweet)
+clean_tweet = gsub("[[:punct:]]", "", clean_tweet)
+clean_tweet = gsub("[[:digit:]]", "", clean_tweet)
+clean_tweet = gsub("http\\w+", "", clean_tweet)
+clean_tweet = gsub("[ \t]{2,}", "", clean_tweet)
+clean_tweet = gsub("^\\s+|\\s+$", "", clean_tweet)
+
+
+
+my_tweets$text_clean <- clean_tweet %>% clean_tweets
+my_tweets
+
+clean_tweet
+
+
+library("stopwords")
+
+clean_tweet <- data.frame(word = stopwords::stopwords("tr", source = "stopwords-iso"), stringsAsFactors = FALSE)
+
+head(clean_tweet)
+View(clean_tweet)
+
+library(tidytext)
+library()
+stop_turkish <- data.frame(word = stopwords::stopwords("tr", source = "stopwords-iso"), stringsAsFactors = FALSE)
+
+head(stop_turkish)
+
+tweets_clean <- my_tweets %>% 
+  select(text_clean) %>% 
+  unnest_tokens(word, text_clean) %>% 
+  anti_join(stop_words) %>% 
+  anti_join(stop_turkish)
+
+tweets_clean %<>% rename(Word = word)
+
+View(tweets_clean)
+stop_words # hazır dataset ingilizcedeki gereksiz kelimeler
+
+words <- tweets_clean %>%
+  count(Word, sort = TRUE) %>%
+  ungroup()
+
+head(words)
+View(words
+     )
+
+
+library(wordcloud) 
+library(RColorBrewer)
+
+wordcloud(words = words$Word, freq = words$n, min.freq = 1, max.words = 200, random.order = FALSE, rot.per = 0.35, colors = brewer.pal(8, "Dark2"))
+
+library(readr)
+http://kelesonur.github.io/compec-r/Turkish-tr-NRC-VAD-Lexicon.txt
+Lexicon <- read_delim(file = "Turkish-tr-NRC-VAD-Lexicon.txt", "\t", 
+                      locale = locale(date_names = "tr", encoding = "UTF-8"))
+
+p_boxplot <- boxplot(words$Arousal, words$Valence, words$Dominance,
+                     main = "Sentiment Analysis",
+                     names = c("Arousal", "Valence", "Dominance"))
+View(p_boxplot)
+
+
+
 
 
